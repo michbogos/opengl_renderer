@@ -1,0 +1,7 @@
+.vscode/
+OpenglRenderer
+
+*.a
+CMakeFiles/
+Makefile
+CMakeCache.txt
