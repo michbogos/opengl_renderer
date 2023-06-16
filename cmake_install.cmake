@@ -54,7 +54,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/user/Desktop/michael/dev/coding/opengl_renderer/glm/cmake_install.cmake")
+  include("/home/user/Desktop/michael/dev/coding/opengl_renderer/tinyobjloader/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)

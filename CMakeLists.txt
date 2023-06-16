@@ -14,9 +14,10 @@ file(GLOB_RECURSE HEADER_FILES
 
 add_subdirectory(glfw)
 add_subdirectory(glad)
-add_subdirectory(glm)
+#add_subdirectory(glm) #doesn't work
+add_subdirectory(tinyobjloader)
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ./include glm stb_image/)
+target_include_directories(${PROJECT_NAME} PRIVATE ./include glm/ stb_image/ tinyobjloader/)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)

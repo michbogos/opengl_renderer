@@ -6,11 +6,15 @@
 #include <glm/gtx/transform.hpp>
 #include<memory>
 
+
 #include <iostream>
 
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -70,6 +74,7 @@ void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 
 int main()
 {
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -98,9 +103,36 @@ int main()
     }
 
     std::unique_ptr<shader> orange(new shader("shader.vert", "shader.frag"));
+    std::unique_ptr<shader> sky(new shader("sky.vert", "shader.frag"));
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("texture.jpeg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("viking_room.png", &width, &height, &nrChannels, 0);
+
+    unsigned int skyBox;
+    glGenTextures(1, &skyBox);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox);
+
+    std::vector<std::string> faces = 
+        {
+            "skybox/right.jpg",
+            "skybox/left.jpg",
+            "skybox/top.jpg",
+            "skybox/bottom.jpg",
+            "skybox/front.jpg",
+            "skybox/back.jpg"
+        };
+ 
+    for(unsigned int i = 0; i < faces.size(); i++)
+    {
+        data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        glTexImage2D(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+            0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+        );
+        stbi_image_free(data);
+    }
+
+
 
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -156,25 +188,18 @@ int main()
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
-    // unsigned int indices[] = {  // note that we start from 0!
-    //     0, 1, 2,  // first Triangle
-    //     0, 2, 3,   // second Triangle
-    //     0, 3, 4,
-    //     0, 1, 4,
 
-    // };
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    //glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertexIndices.size(), vertexIndices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -184,6 +209,13 @@ int main()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     glBindVertexArray(0); 
+
+    unsigned int sky_VAO;
+    glGenVertexArrays(1, &sky_VAO);
+    glBindVertexArray(sky_VAO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     glm::vec3 camPos = {0, 0, 0};
     glm::mat4x4 world = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
@@ -204,7 +236,24 @@ int main()
   		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
         orange->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
         glBindVertexArray(VAO);
+        //glDrawElements(GL_TRIANGLES, sizeof(vertices), GL_UNSIGNED_INT, 0);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glDepthMask(GL_FALSE);
+
+        sky->use();
+        sky->setUniform(glm::lookAt(cameraPos, 
+        cameraPos+cameraFront, 
+  		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
+        sky->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox);
+        glBindVertexArray(sky_VAO);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glDepthMask(GL_TRUE);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
