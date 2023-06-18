@@ -12,7 +12,5 @@ out vec2 TexCoord;
 
 void main()
 {
-    vec4 pos = vec4(aPos, 1.0);
-    gl_Position = proj*view*mat*pos;
-    TexCoord = aTexCoord;
+    gl_Position = proj*view*mat*vec4(aPos, 1.0);
 }

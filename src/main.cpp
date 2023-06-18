@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <shader.h>
 #include <mesh.h>
+#include <world.h>
 #include <glm/gtx/transform.hpp>
 #include<memory>
 
@@ -79,12 +80,13 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenglRenderer", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -102,7 +104,12 @@ int main()
         return -1;
     }
 
+    std::unique_ptr<world> World(new world());
+
+    World->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
+
     std::unique_ptr<shader> orange(new shader("shader.vert", "shader.frag"));
+    std::unique_ptr<shader> light(new shader("light.vert", "light.frag"));
     std::unique_ptr<mesh> cube(new mesh());
 
     int width, height, nrChannels;
@@ -116,7 +123,8 @@ int main()
 
     stbi_image_free(data);
 
-    glEnable(GL_DEPTH_TEST); ;
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     glm::vec3 camPos = {0, 0, 0};
     glm::mat4x4 world = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
@@ -127,9 +135,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         processInput(window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        orange->use();
+        World->giveLightInformation(*orange.get());
         orange->setUniform(glm::rotate<float>(glm::mat4(1.0), glfwGetTime(), {(float)glfwGetTime(), (float)-glfwGetTime(), (float)glfwGetTime()}), "mat");
         orange->setUniform(world, "world");
         orange->setUniform(glm::lookAt(cameraPos, 
@@ -137,6 +145,17 @@ int main()
   		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
         orange->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
         cube->draw();
+
+        light->use();
+        light->setUniform(glm::translate(glm::mat4(1.0f), {2, 2, 2}), "mat");
+        light->setUniform(world, "world");
+        light->setUniform(glm::lookAt(cameraPos, 
+        cameraPos+cameraFront, 
+  		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
+        light->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
+        
+        cube->draw();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

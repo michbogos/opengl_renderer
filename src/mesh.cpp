@@ -41,10 +41,6 @@ mesh::mesh()
     vertices.push_back({{-0.5f,  0.5f,  0.5f},  {0.0f, 0.0f},});
     vertices.push_back({{-0.5f,  0.5f, -0.5f},  {0.0f, 1.0f},});
 
-    for(int i = 0; i < 36; i++){
-        indices.push_back(i);
-    }
-
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -67,8 +63,8 @@ mesh::mesh()
 void mesh::draw(){
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 mesh::~mesh()
