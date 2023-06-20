@@ -1,9 +1,10 @@
 #include<glm/glm.hpp>
 #include<vector>
+#include<string>
 
 struct Vertex{
     glm::vec3 pos;
-    glm::vec2 tex;
+    glm::vec3 tex;
 };
 
 class mesh
@@ -14,6 +15,7 @@ private:
     unsigned int VAO, VBO, EBO;
 public:
     mesh();
+    mesh(std::string file);
     void draw();
     ~mesh();
 };

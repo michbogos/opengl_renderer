@@ -111,6 +111,7 @@ int main()
     std::unique_ptr<shader> orange(new shader("shader.vert", "shader.frag"));
     std::unique_ptr<shader> light(new shader("light.vert", "light.frag"));
     std::unique_ptr<mesh> cube(new mesh());
+    std::unique_ptr<mesh> obj(new mesh("monke.obj"));
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load("viking_room.png", &width, &height, &nrChannels, 0);
@@ -154,7 +155,7 @@ int main()
   		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
         light->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
         
-        cube->draw();
+        obj->draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
