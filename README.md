@@ -2,7 +2,7 @@
 
 Trying to make a 3D renderer in OpenGL. This is the starter code. Got cmake working. Added GLM, GLFW, GLAD and STB_IMAGE.
 
-![screenshot](https://github.com/michbogos/opengl_renderer/blob/master/screenshot.png?raw=true)
+![screenshot](https://github.com/michbogos/opengl_renderer/blob/master/screenshot.png?)
 
 ## Done
 - [x] abstract textures
