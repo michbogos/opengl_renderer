@@ -4,8 +4,15 @@ Trying to make a 3D renderer in OpenGL. This is the starter code. Got cmake work
 
 ![screenshot](https://github.com/michbogos/opengl_renderer/blob/master/screenshot.png?raw=true)
 
-Still need to:
-- [ ] abstract textures
-- [ ] abstract buffers
-- [ ] add more shader uniforms
-- [ ] load obj files
+## Done
+- [x] abstract textures
+- [x] abstract buffers
+- [x] add more shader uniforms
+- [x] load obj files
+
+## To Do
+- [ ] Skybox
+- [ ] HDR
+- [ ] Complex models
+- [ ] PBR
+- [ ] Other file formats
