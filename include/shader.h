@@ -15,6 +15,7 @@ public:
     void setUniform(float uniform, std::string uniformName);
     void setUniform(int uniform, std::string uniformName);
     void setUniform(glm::mat4x4 uniform, std::string uniformName);
+    void setUniform(glm::vec3 uniform, std::string uniformName);
     void setUniform(std::vector<glm::vec3> data, std::string uniformName);
     ~shader();
 };

@@ -96,7 +96,7 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouseCallback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -110,7 +110,6 @@ int main()
 
     std::unique_ptr<shader> orange(new shader("shader.vert", "shader.frag"));
     std::unique_ptr<shader> light(new shader("light.vert", "light.frag"));
-    std::unique_ptr<mesh> cube(new mesh());
     std::unique_ptr<mesh> obj(new mesh("monke.obj"));
 
     int width, height, nrChannels;
@@ -138,17 +137,10 @@ int main()
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        World->giveLightInformation(*orange.get());
-        orange->setUniform(glm::rotate<float>(glm::mat4(1.0), glfwGetTime(), {(float)glfwGetTime(), (float)-glfwGetTime(), (float)glfwGetTime()}), "mat");
-        orange->setUniform(world, "world");
-        orange->setUniform(glm::lookAt(cameraPos, 
-        cameraPos+cameraFront, 
-  		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
-        orange->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
-        cube->draw();
 
         light->use();
-        light->setUniform(glm::translate(glm::mat4(1.0f), {2, 2, 2}), "mat");
+        light->setUniform(cameraPos, "cameraPos");
+        light->setUniform(glm::rotate(glm::translate(glm::mat4(1.0f), {0, 0, 0}), (float)glfwGetTime(), {glfwGetTime(), glfwGetTime(), glfwGetTime()}), "mat");
         light->setUniform(world, "world");
         light->setUniform(glm::lookAt(cameraPos, 
         cameraPos+cameraFront, 

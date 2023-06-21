@@ -83,6 +83,11 @@ void shader::setUniform(glm::mat4x4 uniform, std::string uniformName){
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(uniform));
 }
 
+void shader::setUniform(glm::vec3 uniform, std::string uniformName){
+    uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
+    glUniform3fv(loc, 1, glm::value_ptr(uniform));
+}
+
 void shader::setUniform(std::vector<glm::vec3> data, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
     float arr[data.size()*3];
