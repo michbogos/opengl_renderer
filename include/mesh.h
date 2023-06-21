@@ -3,8 +3,11 @@
 #include<string>
 
 struct Vertex{
-    glm::vec3 pos;
-    glm::vec3 tex;
+    float x;
+    float y;
+    float z;
+    float u;
+    float v;
 };
 
 class mesh
