@@ -24,7 +24,7 @@ glm::vec3 cameraFront = {0, 0, 0};
 glm::vec3 cameraPos = {0, 0, 1};
 glm::mat4x4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 
-std::unique_ptr<world> World(new world());
+std::unique_ptr<World> world(new World());
 
 void setUniforms(Shader shader){
     //World->giveLightInformation(shader);
@@ -120,7 +120,7 @@ int main()
 
     std::shared_ptr<Shader> orange(new Shader("shader.vert", "shader.frag", setUniforms));
     std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
-    std::shared_ptr<mesh> obj(new mesh("monke.obj", light));
+    std::shared_ptr<Mesh> obj(new Mesh("monke.obj", light));
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load("viking_room.png", &width, &height, &nrChannels, 0);
@@ -136,7 +136,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
 
-    World->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
+    world->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(window))

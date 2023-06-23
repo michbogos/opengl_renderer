@@ -15,7 +15,7 @@ struct Vertex{
     float v;
 };
 
-class mesh
+class Mesh
 {
 private:
     std::vector<unsigned int> indices;
@@ -23,9 +23,9 @@ private:
     std::shared_ptr<Shader> shader;
     unsigned int VAO, VBO, EBO;
 public:
-    mesh(std::string file, std::shared_ptr<Shader> shader);
+    Mesh(std::string file, std::shared_ptr<Shader> shader);
     void draw();
-    ~mesh();
+    ~Mesh();
 };
 
 

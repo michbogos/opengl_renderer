@@ -11,14 +11,14 @@ struct Light{
     float intensity;
 };
 
-class world
+class World
 {
 private:
     std::vector<Light> lights;
 public:
-    world();
+    World();
     void addLight(Light light);
     void giveLightInformation(Shader &s);
-    ~world();
+    ~World();
 };
 #endif

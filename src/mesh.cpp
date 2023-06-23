@@ -5,7 +5,7 @@
 #include<string>
 #include<tiny_obj_loader.h>
 
-mesh::mesh(std::string file, std::shared_ptr<Shader> s){
+Mesh::Mesh(std::string file, std::shared_ptr<Shader> s){
     shader = s;
     std::string inputfile = file;
     tinyobj::attrib_t attrib;
@@ -31,18 +31,18 @@ mesh::mesh(std::string file, std::shared_ptr<Shader> s){
 
     
     for (const auto& shape : shapes) {
-    for (const auto& index : shape.mesh.indices) {
-        vertices.push_back({
-            attrib.vertices[3 * index.vertex_index + 0],
-            attrib.vertices[3 * index.vertex_index + 1],
-            attrib.vertices[3 * index.vertex_index + 2],
-            attrib.normals[3 * index.normal_index + 0],
-            attrib.normals[3 * index.normal_index + 1],
-            attrib.normals[3 * index.normal_index + 2],
-            attrib.texcoords[2*index.texcoord_index+0],
-            attrib.texcoords[2*index.texcoord_index+1]});
+        for (const auto& index : shape.mesh.indices) {
+            vertices.push_back({
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2],
+                attrib.normals[3 * index.normal_index + 0],
+                attrib.normals[3 * index.normal_index + 1],
+                attrib.normals[3 * index.normal_index + 2],
+                attrib.texcoords[2*index.texcoord_index+0],
+                attrib.texcoords[2*index.texcoord_index+1]});
+        }
     }
-}
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -66,7 +66,7 @@ mesh::mesh(std::string file, std::shared_ptr<Shader> s){
     glBindVertexArray(0);
 }
 
-void mesh::draw(){
+void Mesh::draw(){
     shader->use();
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -75,7 +75,7 @@ void mesh::draw(){
     glBindVertexArray(0);
 }
 
-mesh::~mesh()
+Mesh::~Mesh()
 {
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
