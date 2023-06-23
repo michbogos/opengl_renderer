@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include<mesh.h>
 #include <filesystem>
 #include <stdexcept>
 #include <iostream>
@@ -68,6 +69,7 @@ Shader::Shader(std::string vertexShaderSource, std::string fragmentShaderSource,
 void Shader::use(){
     glUseProgram(program);
     setUniforms(*this);
+
 }
 
 void Shader::setUniform(float uniform, std::string uniformName){

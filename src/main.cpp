@@ -1,5 +1,3 @@
-
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <shader.h>
@@ -36,6 +34,13 @@ void setUniforms(Shader shader){
     glm::vec3(0.0f, 1.0f, 0.0f)), "view");
     shader.setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
 }
+
+void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id,
+   GLenum severity, GLsizei length, const GLchar* message, const void* userParam){
+    if(severity == GL_DEBUG_SEVERITY_HIGH){
+        std::cout << message << "\n";
+    }
+   }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -91,8 +96,8 @@ int main()
 {
 
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
@@ -110,7 +115,7 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouseCallback);
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -118,23 +123,47 @@ int main()
         return -1;
     }
 
-    std::shared_ptr<Shader> orange(new Shader("shader.vert", "shader.frag", setUniforms));
-    std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
-    std::shared_ptr<Mesh> obj(new Mesh("monke.obj", light));
-
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("viking_room.png", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("obama.jpeg", &width, &height, &nrChannels, 0);
     unsigned int texture;
     glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data);
 
+    unsigned char* data2 = stbi_load("viking_room.png", &width, &height, &nrChannels, 4);
+    unsigned int texture2;
+    glGenTextures(1, &texture2);
+
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(data2);
+
+    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture2, TextureType::diffuse}};
+
+    std::shared_ptr<Shader> orange(new Shader("shader.vert", "shader.frag", setUniforms));
+    std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
+    std::shared_ptr<Mesh> obj(new Mesh("monke.obj", light, textures));
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(debugCallback, nullptr);
 
     world->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
 

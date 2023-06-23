@@ -3,10 +3,14 @@
 #include <memory>
 #include<iostream>
 #include<string>
+#include<utils.h>
 #include<tiny_obj_loader.h>
+#include <stb_image.h>
 
-Mesh::Mesh(std::string file, std::shared_ptr<Shader> s){
+Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> texs){
+    textures = texs;
     shader = s;
+    textures.reserve(10);
     std::string inputfile = file;
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -64,19 +68,92 @@ Mesh::Mesh(std::string file, std::shared_ptr<Shader> s){
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
     glEnableVertexAttribArray(2); 
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Mesh::draw(){
-    shader->use();
+    glActiveTexture(GL_TEXTURE8);
+    glBindTexture(GL_TEXTURE_2D, textures[0].id);
+
+    glActiveTexture(GL_TEXTURE9);
+    glBindTexture(GL_TEXTURE_2D, textures[1].id);
+
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, textures[1].id);
+    // shader->setUniform(1, "texture2");
+    // int diff = 0;
+    // int spec = 0;
+    // int norm = 0;
+    // for(int i=0 ; i < textures.size(); i++){
+    //     glActiveTexture(GL_TEXTURE0+i);
+    //     glBindTexture(GL_TEXTURE_2D, textures[i].id);
+    //     switch (textures[i].type)
+    //     {
+    //     case TextureType::diffuse:
+    //         shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
+    //         std::cout << "DIFFUSE_" + std::to_string(diff) << "\n";
+    //         diff++;
+    //         break;
+    //     case TextureType::specular:
+    //         shader->setUniform(i, "SPECULAR_" + std::to_string(spec));
+    //         spec++;
+    //         break;
+    //     case TextureType::normal:
+    //         shader->setUniform(i, "NORMAL_" + std::to_string(norm));
+    //         norm ++;
+    //         break;
+        
+    //     default:
+    //         shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
+    //         diff++;
+    //         break;
+    //     }
+    // }
+    glUseProgram(shader->program);
+    shader->setUniforms(*shader);
+    shader->setUniform(8, "texture1");
+    shader->setUniform(9, "texture2");
+    // glBindTexture(GL_TEXTURE_2D, textures[0].id);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::addTexture(std::string filename, TextureType type){
+    Texture texture;
+    texture.type = type;
+    std::cout << texture.id << "\n";
+    glGenTextures(1, &texture.id);
+    std::cout << texture.id << "\n";
+    glBindTexture(GL_TEXTURE_2D, texture.type);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
+
+    if(data){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        textures.push_back(texture);
+    }
+    else{
+        std::cout << "Failed to load image: " << filename << "\n";
+    }
+
+    stbi_image_free(data);
 }
 
 Mesh::~Mesh()
 {
+    for(Texture texture : textures){
+        glDeleteTextures(1, &texture.id);
+    }
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);

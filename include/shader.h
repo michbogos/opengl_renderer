@@ -8,9 +8,9 @@
 class Shader
 {
 private:
+public:
     GLuint program;
     void(*setUniforms)(Shader shader);
-public:
     Shader(std::string vertexShaderSource, std::string fragShaderSource, void(*setUniforms)(Shader shader));
     void use();
     void setUniform(float uniform, std::string uniformName);
