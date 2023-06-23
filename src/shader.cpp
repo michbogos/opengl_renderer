@@ -11,8 +11,9 @@
 #include <iostream>
 #include <vector>
 
-shader::shader(std::string vertexShaderSource, std::string fragmentShaderSource)
+Shader::Shader(std::string vertexShaderSource, std::string fragmentShaderSource, void(*setUniformsFunction)(Shader shader))
 {
+    setUniforms = setUniformsFunction;
     if(!std::filesystem::exists(vertexShaderSource) || !std::filesystem::exists(fragmentShaderSource)){
         throw std::runtime_error("Shader file does not exist!");
     }
@@ -64,31 +65,32 @@ shader::shader(std::string vertexShaderSource, std::string fragmentShaderSource)
     fShaderFile.close();
 }
 
-void shader::use(){
+void Shader::use(){
     glUseProgram(program);
+    setUniforms(*this);
 }
 
-void shader::setUniform(float uniform, std::string uniformName){
+void Shader::setUniform(float uniform, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
     glUniform1f(uniform, loc);
 }
 
-void shader::setUniform(int uniform, std::string uniformName){
+void Shader::setUniform(int uniform, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
     glUniform1i(uniform, loc);
 }
 
-void shader::setUniform(glm::mat4x4 uniform, std::string uniformName){
+void Shader::setUniform(glm::mat4x4 uniform, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(uniform));
 }
 
-void shader::setUniform(glm::vec3 uniform, std::string uniformName){
+void Shader::setUniform(glm::vec3 uniform, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
     glUniform3fv(loc, 1, glm::value_ptr(uniform));
 }
 
-void shader::setUniform(std::vector<glm::vec3> data, std::string uniformName){
+void Shader::setUniform(std::vector<glm::vec3> data, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
     float arr[data.size()*3];
     for(int i = 0; i < data.size(); i += 3){
@@ -99,7 +101,7 @@ void shader::setUniform(std::vector<glm::vec3> data, std::string uniformName){
     glUniform3fv(loc, data.size(), arr);
 }
 
-shader::~shader()
+Shader::~Shader()
 {
     glDeleteProgram(program);
 }

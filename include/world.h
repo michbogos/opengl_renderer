@@ -18,7 +18,7 @@ private:
 public:
     world();
     void addLight(Light light);
-    void giveLightInformation(shader &s);
+    void giveLightInformation(Shader &s);
     ~world();
 };
 #endif

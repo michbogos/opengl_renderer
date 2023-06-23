@@ -1,10 +1,12 @@
 #include<mesh.h>
 #include<glad/glad.h>
+#include <memory>
 #include<iostream>
 #include<string>
 #include<tiny_obj_loader.h>
 
-mesh::mesh(std::string file){
+mesh::mesh(std::string file, std::shared_ptr<Shader> s){
+    shader = s;
     std::string inputfile = file;
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -65,6 +67,7 @@ mesh::mesh(std::string file){
 }
 
 void mesh::draw(){
+    shader->use();
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

@@ -11,7 +11,7 @@ void world::addLight(Light light){
     lights.push_back(light);
 }
 
-void world::giveLightInformation(shader &s){
+void world::giveLightInformation(Shader &s){
     s.use();
     std::vector<glm::vec3> light_pos(lights.size());
     for(int i = 0; i < lights.size(); i++){

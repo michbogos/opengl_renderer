@@ -17,21 +17,35 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+glm::vec3 cameraFront = {0, 0, 0};
+glm::vec3 cameraPos = {0, 0, 1};
+glm::mat4x4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+
+std::unique_ptr<world> World(new world());
+
+void setUniforms(Shader shader){
+    //World->giveLightInformation(shader);
+    shader.setUniform(cameraPos, "cameraPos");
+    shader.setUniform(glm::rotate(glm::translate(glm::mat4(1.0f), {0, 0, 0}), (float)glfwGetTime(), {glfwGetTime(), glfwGetTime(), glfwGetTime()}), "mat");
+    shader.setUniform(view, "world");
+    shader.setUniform(glm::lookAt(cameraPos,
+    cameraPos+cameraFront, 
+    glm::vec3(0.0f, 1.0f, 0.0f)), "view");
+    shader.setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
 double lastX;
 double lastY;
 double mouseYPrev = 300;
 double pitch = 0.0;
 double yaw = 0.0;
-
-glm::vec3 cameraFront = {0, 0, 0};
-glm::vec3 cameraPos = {0, 0, 1};
 
 bool firstMouse = true;
 
@@ -104,13 +118,9 @@ int main()
         return -1;
     }
 
-    std::unique_ptr<world> World(new world());
-
-    World->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
-
-    std::unique_ptr<shader> orange(new shader("shader.vert", "shader.frag"));
-    std::unique_ptr<shader> light(new shader("light.vert", "light.frag"));
-    std::unique_ptr<mesh> obj(new mesh("monke.obj"));
+    std::shared_ptr<Shader> orange(new Shader("shader.vert", "shader.frag", setUniforms));
+    std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
+    std::shared_ptr<mesh> obj(new mesh("monke.obj", light));
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load("viking_room.png", &width, &height, &nrChannels, 0);
@@ -126,8 +136,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
 
-    glm::vec3 camPos = {0, 0, 0};
-    glm::mat4x4 world = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    World->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(window))
@@ -138,15 +147,6 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        light->use();
-        light->setUniform(cameraPos, "cameraPos");
-        light->setUniform(glm::rotate(glm::translate(glm::mat4(1.0f), {0, 0, 0}), (float)glfwGetTime(), {glfwGetTime(), glfwGetTime(), glfwGetTime()}), "mat");
-        light->setUniform(world, "world");
-        light->setUniform(glm::lookAt(cameraPos, 
-        cameraPos+cameraFront, 
-  		glm::vec3(0.0f, 1.0f, 0.0f)), "view");
-        light->setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
-        
         obj->draw();
 
         glfwSwapBuffers(window);
