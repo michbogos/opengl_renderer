@@ -3,7 +3,6 @@
 #include <memory>
 #include<iostream>
 #include<string>
-#include<utils.h>
 #include<tiny_obj_loader.h>
 #include <stb_image.h>
 
