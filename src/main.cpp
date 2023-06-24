@@ -124,39 +124,39 @@ int main()
     }
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load("obama.jpeg", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("backpack/diffuse.jpg", &width, &height, &nrChannels, 0);
     unsigned int texture;
     glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data);
 
-    unsigned char* data2 = stbi_load("viking_room.png", &width, &height, &nrChannels, 4);
+    unsigned char* data2 = stbi_load("backpack/specular.jpg", &width, &height, &nrChannels, 4);
     unsigned int texture2;
     glGenTextures(1, &texture2);
 
     glBindTexture(GL_TEXTURE_2D, texture2);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data2);
 
-    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture2, TextureType::diffuse}};
+    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture2, TextureType::specular}};
 
     std::shared_ptr<Shader> orange(new Shader("shader.vert", "shader.frag", setUniforms));
     std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
-    std::shared_ptr<Mesh> obj(new Mesh("monke.obj", light, textures));
+    std::shared_ptr<Mesh> obj(new Mesh("backpack/backpack.obj", light, textures));
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
