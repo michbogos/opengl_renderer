@@ -74,12 +74,12 @@ void Shader::use(){
 
 void Shader::setUniform(float uniform, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
-    glUniform1f(uniform, loc);
+    glUniform1f(loc, uniform);
 }
 
 void Shader::setUniform(int uniform, std::string uniformName){
     uint32_t loc = glGetUniformLocation(program, uniformName.c_str());
-    glUniform1i(uniform, loc);
+    glUniform1i(loc, uniform);
 }
 
 void Shader::setUniform(glm::mat4x4 uniform, std::string uniformName){

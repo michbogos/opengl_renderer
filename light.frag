@@ -1,8 +1,8 @@
 #version 330 core
 out vec4 FragColor;
 
-uniform sampler2D texture1;
-uniform sampler2D texture2;
+uniform sampler2D DIFFUSE_1;
+uniform sampler2D DIFFUSE_2;
 
 in vec3 Normal;
 in vec3 FragPos;
@@ -25,6 +25,6 @@ void main()
     vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * vec3(1.0, 1.0, 1.0);  
-    vec3 result = (vec3(0.3,0.3, 0.3) + diffuse + specular) * mix(vec3(texture(texture1, TexCoord)), vec3(texture(texture2, TexCoord)), 0.5);
+    vec3 result = (vec3(0.3,0.3, 0.3) + diffuse + specular) * mix(vec3(texture(DIFFUSE_1, TexCoord)), vec3(texture(DIFFUSE_2, TexCoord)), 0.5);
     FragColor = vec4(result, 1.0);
 }

@@ -72,48 +72,36 @@ Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> tex
 }
 
 void Mesh::draw(){
-    glActiveTexture(GL_TEXTURE8);
-    glBindTexture(GL_TEXTURE_2D, textures[0].id);
-
-    glActiveTexture(GL_TEXTURE9);
-    glBindTexture(GL_TEXTURE_2D, textures[1].id);
-
-    // glActiveTexture(GL_TEXTURE1);
-    // glBindTexture(GL_TEXTURE_2D, textures[1].id);
-    // shader->setUniform(1, "texture2");
-    // int diff = 0;
-    // int spec = 0;
-    // int norm = 0;
-    // for(int i=0 ; i < textures.size(); i++){
-    //     glActiveTexture(GL_TEXTURE0+i);
-    //     glBindTexture(GL_TEXTURE_2D, textures[i].id);
-    //     switch (textures[i].type)
-    //     {
-    //     case TextureType::diffuse:
-    //         shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
-    //         std::cout << "DIFFUSE_" + std::to_string(diff) << "\n";
-    //         diff++;
-    //         break;
-    //     case TextureType::specular:
-    //         shader->setUniform(i, "SPECULAR_" + std::to_string(spec));
-    //         spec++;
-    //         break;
-    //     case TextureType::normal:
-    //         shader->setUniform(i, "NORMAL_" + std::to_string(norm));
-    //         norm ++;
-    //         break;
-        
-    //     default:
-    //         shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
-    //         diff++;
-    //         break;
-    //     }
-    // }
     glUseProgram(shader->program);
+    int diff = 0;
+    int spec = 0;
+    int norm = 0;
+    for(int i=0 ; i < textures.size(); i++){
+        glActiveTexture(GL_TEXTURE0+i);
+        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        switch (textures[i].type)
+        {
+        case TextureType::diffuse:
+            shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
+            diff++;
+            break;
+        case TextureType::specular:
+            shader->setUniform(i, "SPECULAR_" + std::to_string(spec));
+            spec++;
+            break;
+        case TextureType::normal:
+            shader->setUniform(i, "NORMAL_" + std::to_string(norm));
+            norm ++;
+            break;
+        
+        default:
+            shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
+            diff++;
+            break;
+        }
+    }
     shader->setUniforms(*shader);
-    shader->setUniform(8, "texture1");
-    shader->setUniform(9, "texture2");
-    // glBindTexture(GL_TEXTURE_2D, textures[0].id);
+
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
