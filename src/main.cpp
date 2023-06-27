@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 #include <shader.h>
 #include <mesh.h>
-#include <world.h>
 #include <glm/gtx/transform.hpp>
 #include<memory>
 
@@ -22,10 +21,11 @@ glm::vec3 cameraFront = {0, 0, 0};
 glm::vec3 cameraPos = {0, 0, 1};
 glm::mat4x4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 
-std::unique_ptr<World> world(new World());
+std::vector<glm::vec3> lights = {{0.0, 0.0, -0.5}};
 
 void setUniforms(Shader shader){
-    //World->giveLightInformation(shader);
+    shader.setUniform(lights, "lights");
+    shader.setUniform((int)lights.size(), "lights_size");
     shader.setUniform(cameraPos, "cameraPos");
     shader.setUniform(glm::rotate(glm::translate(glm::mat4(1.0f), {0, 0, 0}), (float)glfwGetTime(), {glfwGetTime(), glfwGetTime(), glfwGetTime()}), "mat");
     shader.setUniform(view, "world");
@@ -124,7 +124,7 @@ int main()
     }
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load("backpack/diffuse.jpg", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("rocks/aerial_rocks_02_diff_1k.jpg", &width, &height, &nrChannels, 0);
     unsigned int texture;
     glGenTextures(1, &texture);
 
@@ -138,7 +138,7 @@ int main()
 
     stbi_image_free(data);
 
-    unsigned char* data2 = stbi_load("backpack/specular.jpg", &width, &height, &nrChannels, 4);
+    unsigned char* data2 = stbi_load("rocks/aerial_rocks_02_rough_1k.png", &width, &height, &nrChannels, 4);
     unsigned int texture2;
     glGenTextures(1, &texture2);
 
@@ -150,13 +150,24 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    stbi_image_free(data2);
 
-    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture2, TextureType::specular}};
+    unsigned char* data3 = stbi_load("rocks/aerial_rocks_02_nor_gl_1k.png", &width, &height, &nrChannels, 4);
+    unsigned int texture3;
+    glGenTextures(1, &texture3);
 
-    std::shared_ptr<Shader> orange(new Shader("shader.vert", "shader.frag", setUniforms));
+    glBindTexture(GL_TEXTURE_2D, texture3);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data3);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data3);
+
+    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture2, TextureType::specular}, {texture3, TextureType::normal}};
+
     std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
-    std::shared_ptr<Mesh> obj(new Mesh("backpack/backpack.obj", light, textures));
+    std::shared_ptr<Mesh> obj(new Mesh("monke.obj", light, textures));
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -164,8 +175,6 @@ int main()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(debugCallback, nullptr);
-
-    world->addLight({.pos={2.0, 2.0, 2.0}, .color={1.0, 1.0, 1.0}, .intensity=1.0});
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(window))
@@ -181,6 +190,10 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    glDeleteTextures(1, &texture);
+    glDeleteTextures(1, &texture2);
+    glDeleteTextures(1, &texture3);
+
     glfwTerminate();
     return 0;
 }

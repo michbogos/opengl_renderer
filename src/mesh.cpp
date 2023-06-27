@@ -32,7 +32,6 @@ Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> tex
     exit(1);
     }
 
-    
     for (const auto& shape : shapes) {
         for (const auto& index : shape.mesh.indices) {
             vertices.push_back({
@@ -42,10 +41,53 @@ Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> tex
                 attrib.normals[3 * index.normal_index + 0],
                 attrib.normals[3 * index.normal_index + 1],
                 attrib.normals[3 * index.normal_index + 2],
+                0, 0, 0,
                 attrib.texcoords[2*index.texcoord_index+0],
-                attrib.texcoords[2*index.texcoord_index+1]});
+                attrib.texcoords[2*index.texcoord_index+1],});
         }
     }
+
+    for(int i = 0; i < vertices.size(); i+=3){
+        auto v0 = vertices[i];
+        auto v1 = vertices[i+1];
+        auto v2 = vertices[i+2];
+
+        glm::vec3 e1 = {v1.x-v0.x, v1.y-v0.y, v1.z-v0.z};
+        glm::vec3 e2 = {v2.x-v0.x, v2.y-v0.y, v2.z-v0.z};
+
+        glm::vec2  duv1 = {v1.u-v0.u, v1.v-v0.v};
+        glm::vec2  duv2 = {v2.u-v0.u, v2.v-v0.v};
+
+        float f = 1.0f / (duv1.x*duv2.y - duv2.x*duv1.y);
+
+        glm::vec3 tangent;
+
+        tangent.x = f * (duv2.y * e1.x - duv1.y * e2.x);
+        tangent.y = f * (duv2.y * e1.y - duv1.y * e2.y);
+        tangent.z = f * (duv2.y * e1.z - duv1.y * e2.z);
+
+        vertices[i+0].tx += tangent.x;
+        vertices[i+0].ty += tangent.y;
+        vertices[i+0].tz += tangent.z;
+
+        vertices[i+1].tx += tangent.x;
+        vertices[i+1].ty += tangent.y;
+        vertices[i+1].tz += tangent.z;
+
+        vertices[i+2].tx += tangent.x;
+        vertices[i+2].ty += tangent.y;
+        vertices[i+2].tz += tangent.z;
+
+    }
+
+    for(int i = 0; i < vertices.size(); i++){
+        glm::vec3 t = {vertices[i].tx, vertices[i].ty, vertices[i].tz};
+        t = glm::normalize(t);
+        vertices[i].tx = t.x;
+        vertices[i].ty = t.y;
+        vertices[i].tz = t.z;
+    }
+
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -64,8 +106,12 @@ Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> tex
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, nx));
     glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tx));
     glEnableVertexAttribArray(2); 
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, u));
+    glEnableVertexAttribArray(3); 
+
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
