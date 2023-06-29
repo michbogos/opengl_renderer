@@ -184,9 +184,9 @@ void Mesh::addTexture(std::string filename, TextureType type){
 
 Mesh::~Mesh()
 {
-    for(Texture texture : textures){
-        glDeleteTextures(1, &texture.id);
-    }
+    // for(Texture texture : textures){
+    //     glDeleteTextures(1, &texture.id);
+    // }
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
