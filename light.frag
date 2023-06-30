@@ -1,9 +1,10 @@
 #version 330 core
 out vec4 FragColor;
 
-uniform sampler2D DIFFUSE_0;
 uniform sampler2D SPECULAR_0;
 uniform sampler2D NORMAL_0;
+uniform sampler2D DIFFUSE_0;
+uniform sampler2D DIFFUSE_2;
 
 in vec3 Normal;
 in vec3 FragPos;
@@ -35,7 +36,7 @@ vec3 CalcPointLight(vec3 position, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular)*texture(DIFFUSE_2, TexCoord).x;
 } 
 
 
@@ -59,4 +60,5 @@ void main()
         result += CalcPointLight(lights[i], NewNormal, FragPos, viewDir);
     }
     FragColor = vec4(result, 1.0);
+    //FragColor = texture(DIFFUSE_1, TexCoord);
 }

@@ -21,7 +21,7 @@ glm::vec3 cameraFront = {0, 0, 0};
 glm::vec3 cameraPos = {0, 0, 1};
 glm::mat4x4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 
-std::vector<glm::vec3> lights = {{0.0, 0.0, -0.5}};
+std::vector<glm::vec3> lights = {{0.0, 0.0, -0.1}};
 
 void setUniforms(Shader shader){
     shader.setUniform(lights, "lights");
@@ -165,10 +165,34 @@ int main()
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data3);
 
-    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture2, TextureType::specular}, {texture3, TextureType::normal}};
+    unsigned char* data4 = stbi_load("rocks/aerial_rocks_02_disp_1k.png", &width, &height, &nrChannels, 4);
+    unsigned int texture4;
+    glGenTextures(1, &texture4);
+    glBindTexture(GL_TEXTURE_2D, texture4);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data4);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data4);
+
+    unsigned char* data5 = stbi_load("rocks/aerial_rocks_02_ao_1k.jpg", &width, &height, &nrChannels, 4);
+    unsigned int texture5;
+    glGenTextures(1, &texture5);
+    glBindTexture(GL_TEXTURE_2D, texture5);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data5);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data5);
+
+    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture4, TextureType::diffuse}, {texture5, TextureType::diffuse}, {texture2, TextureType::specular}, {texture3, TextureType::normal}};
 
     std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
-    std::shared_ptr<Mesh> obj(new Mesh("monke.obj", light, textures));
+    std::shared_ptr<Mesh> obj(new Mesh("sphere.obj", light, textures));
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);

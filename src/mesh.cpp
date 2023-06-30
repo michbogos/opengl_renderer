@@ -124,25 +124,17 @@ void Mesh::draw(){
     for(int i=0 ; i < textures.size(); i++){
         glActiveTexture(GL_TEXTURE0+i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
-        switch (textures[i].type)
-        {
-        case TextureType::diffuse:
+        if(textures[i].type == TextureType::diffuse){
             shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
             diff++;
-            break;
-        case TextureType::specular:
+        }
+        if(textures[i].type == TextureType::specular){
             shader->setUniform(i, "SPECULAR_" + std::to_string(spec));
             spec++;
-            break;
-        case TextureType::normal:
+        }
+        if(textures[i].type == TextureType::normal){
             shader->setUniform(i, "NORMAL_" + std::to_string(norm));
-            norm ++;
-            break;
-        
-        default:
-            shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
-            diff++;
-            break;
+            norm++;
         }
     }
     shader->setUniforms(*shader);
@@ -158,9 +150,7 @@ void Mesh::draw(){
 void Mesh::addTexture(std::string filename, TextureType type){
     Texture texture;
     texture.type = type;
-    std::cout << texture.id << "\n";
     glGenTextures(1, &texture.id);
-    std::cout << texture.id << "\n";
     glBindTexture(GL_TEXTURE_2D, texture.type);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -184,9 +174,6 @@ void Mesh::addTexture(std::string filename, TextureType type){
 
 Mesh::~Mesh()
 {
-    // for(Texture texture : textures){
-    //     glDeleteTextures(1, &texture.id);
-    // }
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
