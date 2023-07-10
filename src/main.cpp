@@ -39,10 +39,10 @@ void setSkyUniforms(Shader shader){
     shader.setUniform(lights, "lights");
     shader.setUniform((int)lights.size(), "lights_size");
     shader.setUniform(cameraPos, "cameraPos");
-    shader.setUniform(glm::scale(glm::mat4(1.0f), {20, 20, 20}), "mat");
+    shader.setUniform(glm::scale(glm::mat4(1.0f), {100, 100, 100}), "mat");
     shader.setUniform(view, "world");
-    shader.setUniform(glm::lookAt(cameraPos,
-    cameraPos+cameraFront, 
+    shader.setUniform(glm::lookAt({0.0f, 0.0f, 0.0f},
+    cameraFront, 
     glm::vec3(0.0f, 1.0f, 0.0f)), "view");
     shader.setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
 }
@@ -136,6 +136,8 @@ int main()
         return -1;
     }
 
+    stbi_set_flip_vertically_on_load(1);
+
     int width, height, nrChannels;
     unsigned char* data = stbi_load("rocks/aerial_rocks_02_diff_1k.jpg", &width, &height, &nrChannels, 0);
     unsigned int texture;
@@ -207,7 +209,7 @@ int main()
     Shader sky_shader("sky.vert", "sky.frag", setSkyUniforms);
     Mesh obj("sphere.obj", textures);
 
-    unsigned char* sky_data = stbi_load("sky.png", &width, &height, &nrChannels, 3);
+    float* sky_data = stbi_loadf("sky.hdr", &width, &height, &nrChannels, 3);
     unsigned int sky_texture;
     glGenTextures(1, &sky_texture);
     glBindTexture(GL_TEXTURE_2D, sky_texture);
@@ -215,7 +217,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, sky_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, sky_data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(sky_data);
 
@@ -232,17 +234,20 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(window))
     {
+        double t1 = glfwGetTime();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         processInput(window);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        sky.draw(sky_shader);
         obj.draw(light);
+        sky.draw(sky_shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        double t2 = glfwGetTime();
+        glfwSetWindowTitle(window, (std::to_string(1.0/(t2-t1))+" FPS").c_str());
     }
     light.cleanup();
     sky_shader.cleanup();
