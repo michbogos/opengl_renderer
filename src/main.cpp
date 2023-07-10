@@ -35,6 +35,18 @@ void setUniforms(Shader shader){
     shader.setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
 }
 
+void setSkyUniforms(Shader shader){
+    shader.setUniform(lights, "lights");
+    shader.setUniform((int)lights.size(), "lights_size");
+    shader.setUniform(cameraPos, "cameraPos");
+    shader.setUniform(glm::scale(glm::mat4(1.0f), {20, 20, 20}), "mat");
+    shader.setUniform(view, "world");
+    shader.setUniform(glm::lookAt(cameraPos,
+    cameraPos+cameraFront, 
+    glm::vec3(0.0f, 1.0f, 0.0f)), "view");
+    shader.setUniform(glm::perspective<float>(3.14/2.0f, (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f), "proj");
+}
+
 void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id,
    GLenum severity, GLsizei length, const GLchar* message, const void* userParam){
     if(severity == GL_DEBUG_SEVERITY_HIGH){
@@ -191,8 +203,24 @@ int main()
 
     std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture4, TextureType::diffuse}, {texture5, TextureType::diffuse}, {texture2, TextureType::specular}, {texture3, TextureType::normal}};
 
-    std::shared_ptr<Shader> light(new Shader("light.vert", "light.frag", setUniforms));
-    std::shared_ptr<Mesh> obj(new Mesh("sphere.obj", light, textures));
+    Shader light("light.vert", "light.frag", setUniforms);
+    Shader sky_shader("sky.vert", "sky.frag", setSkyUniforms);
+    Mesh obj("sphere.obj", textures);
+
+    unsigned char* sky_data = stbi_load("sky.png", &width, &height, &nrChannels, 3);
+    unsigned int sky_texture;
+    glGenTextures(1, &sky_texture);
+    glBindTexture(GL_TEXTURE_2D, sky_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, sky_data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(sky_data);
+
+
+    Mesh sky("sphere.obj", {{sky_texture, TextureType::diffuse}});
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -210,14 +238,20 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        obj->draw();
+        sky.draw(sky_shader);
+        obj.draw(light);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    light.cleanup();
+    sky_shader.cleanup();
+    obj.cleanup();
+    sky.cleanup();
     glDeleteTextures(1, &texture);
     glDeleteTextures(1, &texture2);
     glDeleteTextures(1, &texture3);
+    glDeleteTextures(1, &sky_texture);
 
     glfwTerminate();
     return 0;

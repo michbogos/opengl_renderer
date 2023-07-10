@@ -103,7 +103,12 @@ void Shader::setUniform(std::vector<glm::vec3> data, std::string uniformName){
     glUniform3fv(loc, data.size(), arr);
 }
 
+void Shader::cleanup(){
+    glDeleteProgram(program);
+    std::cout << "Deleting Shader " << program << "\n";
+}
+
 Shader::~Shader()
 {
-    glDeleteProgram(program);
+//     std::cout << "Deleting Shader\n";
 }

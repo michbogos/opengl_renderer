@@ -9,7 +9,7 @@ class Shader
 {
 private:
 public:
-    GLuint program;
+    unsigned int program;
     void(*setUniforms)(Shader shader);
     Shader(std::string vertexShaderSource, std::string fragShaderSource, void(*setUniforms)(Shader shader));
     void use();
@@ -18,6 +18,7 @@ public:
     void setUniform(glm::mat4x4 uniform, std::string uniformName);
     void setUniform(glm::vec3 uniform, std::string uniformName);
     void setUniform(std::vector<glm::vec3> data, std::string uniformName);
+    void cleanup();
     ~Shader();
 };
 

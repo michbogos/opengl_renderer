@@ -6,10 +6,8 @@
 #include<tiny_obj_loader.h>
 #include <stb_image.h>
 
-Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> texs){
+Mesh::Mesh(std::string file,std::vector<Texture> texs){
     textures = texs;
-    shader = s;
-    textures.reserve(10);
     std::string inputfile = file;
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -116,8 +114,8 @@ Mesh::Mesh(std::string file, std::shared_ptr<Shader> s, std::vector<Texture> tex
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Mesh::draw(){
-    glUseProgram(shader->program);
+void Mesh::draw(Shader shader){
+    glUseProgram(shader.program);
     int diff = 0;
     int spec = 0;
     int norm = 0;
@@ -125,26 +123,25 @@ void Mesh::draw(){
         glActiveTexture(GL_TEXTURE0+i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
         if(textures[i].type == TextureType::diffuse){
-            shader->setUniform(i, "DIFFUSE_" + std::to_string(diff));
+            shader.setUniform(i, "DIFFUSE_" + std::to_string(diff));
             diff++;
         }
         if(textures[i].type == TextureType::specular){
-            shader->setUniform(i, "SPECULAR_" + std::to_string(spec));
+            shader.setUniform(i, "SPECULAR_" + std::to_string(spec));
             spec++;
         }
         if(textures[i].type == TextureType::normal){
-            shader->setUniform(i, "NORMAL_" + std::to_string(norm));
+            shader.setUniform(i, "NORMAL_" + std::to_string(norm));
             norm++;
         }
     }
-    shader->setUniforms(*shader);
+    shader.setUniforms(shader);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Mesh::addTexture(std::string filename, TextureType type){
@@ -172,9 +169,12 @@ void Mesh::addTexture(std::string filename, TextureType type){
     stbi_image_free(data);
 }
 
-Mesh::~Mesh()
-{
+void Mesh::cleanup(){
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
+}
+
+Mesh::~Mesh()
+{ 
 }
