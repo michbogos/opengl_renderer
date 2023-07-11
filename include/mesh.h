@@ -30,6 +30,11 @@ struct Texture{
     TextureType type;
 };
 
+struct TextureInfo{
+    std::string filepath;
+    TextureType type;
+};
+
 class Mesh
 {
 private:
@@ -38,7 +43,7 @@ private:
     std::vector<Texture> textures;
     unsigned int VAO, VBO, EBO;
 public:
-    Mesh(std::string file, std::vector<Texture> texs);
+    Mesh(std::string file, std::vector<TextureInfo> texs);
     void draw(Shader shader);
     void addTexture(std::string filename, TextureType type);
     void cleanup();

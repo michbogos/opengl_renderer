@@ -138,91 +138,12 @@ int main()
 
     stbi_set_flip_vertically_on_load(1);
 
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("rocks/aerial_rocks_02_diff_1k.jpg", &width, &height, &nrChannels, 0);
-    unsigned int texture;
-    glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
-
-    unsigned char* data2 = stbi_load("rocks/aerial_rocks_02_rough_1k.png", &width, &height, &nrChannels, 4);
-    unsigned int texture2;
-    glGenTextures(1, &texture2);
-
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-
-    unsigned char* data3 = stbi_load("rocks/aerial_rocks_02_nor_gl_1k.png", &width, &height, &nrChannels, 4);
-    unsigned int texture3;
-    glGenTextures(1, &texture3);
-
-    glBindTexture(GL_TEXTURE_2D, texture3);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data3);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data3);
-
-    unsigned char* data4 = stbi_load("rocks/aerial_rocks_02_disp_1k.png", &width, &height, &nrChannels, 4);
-    unsigned int texture4;
-    glGenTextures(1, &texture4);
-    glBindTexture(GL_TEXTURE_2D, texture4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data4);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data4);
-
-    unsigned char* data5 = stbi_load("rocks/aerial_rocks_02_ao_1k.jpg", &width, &height, &nrChannels, 4);
-    unsigned int texture5;
-    glGenTextures(1, &texture5);
-    glBindTexture(GL_TEXTURE_2D, texture5);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data5);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data5);
-
-    std::vector<Texture> textures = {{texture, TextureType::diffuse}, {texture4, TextureType::diffuse}, {texture5, TextureType::diffuse}, {texture2, TextureType::specular}, {texture3, TextureType::normal}};
+    std::vector<TextureInfo> textures = {{"rocks/aerial_rocks_02_diff_1k.jpg", TextureType::diffuse}, {"rocks/aerial_rocks_02_disp_1k.png", TextureType::diffuse}, {"rocks/aerial_rocks_02_ao_1k.jpg", TextureType::diffuse}, {"rocks/aerial_rocks_02_rough_1k.png", TextureType::specular}, {"rocks/aerial_rocks_02_nor_gl_1k.png", TextureType::normal}};
 
     Shader light("light.vert", "light.frag", setUniforms);
     Shader sky_shader("sky.vert", "sky.frag", setSkyUniforms);
     Mesh obj("sphere.obj", textures);
-
-    float* sky_data = stbi_loadf("sky.hdr", &width, &height, &nrChannels, 3);
-    unsigned int sky_texture;
-    glGenTextures(1, &sky_texture);
-    glBindTexture(GL_TEXTURE_2D, sky_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, sky_data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(sky_data);
-
-
-    Mesh sky("sphere.obj", {{sky_texture, TextureType::diffuse}});
+    Mesh sky("sphere.obj", {{"sky.png", TextureType::diffuse}});
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -253,10 +174,6 @@ int main()
     sky_shader.cleanup();
     obj.cleanup();
     sky.cleanup();
-    glDeleteTextures(1, &texture);
-    glDeleteTextures(1, &texture2);
-    glDeleteTextures(1, &texture3);
-    glDeleteTextures(1, &sky_texture);
 
     glfwTerminate();
     return 0;

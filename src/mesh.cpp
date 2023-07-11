@@ -6,8 +6,23 @@
 #include<tiny_obj_loader.h>
 #include <stb_image.h>
 
-Mesh::Mesh(std::string file,std::vector<Texture> texs){
-    textures = texs;
+Mesh::Mesh(std::string file,std::vector<TextureInfo> texs){
+    for(auto tex:texs){
+        int width, height, nrChannels;
+        unsigned char* data = stbi_load(tex.filepath.c_str(), &width, &height, &nrChannels, 3);
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
+
+        textures.push_back({texture, tex.type});
+    }
     std::string inputfile = file;
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -173,6 +188,10 @@ void Mesh::cleanup(){
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
+
+    for(auto texture:textures){
+        glDeleteTextures(1, &texture.id);
+    }
 }
 
 Mesh::~Mesh()
