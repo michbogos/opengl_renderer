@@ -45,7 +45,6 @@ private:
 public:
     Mesh(std::string file, std::vector<TextureInfo> texs);
     void draw(Shader shader);
-    void addTexture(std::string filename, TextureType type);
     void cleanup();
     ~Mesh();
 };

@@ -3,7 +3,7 @@
 #include <shader.h>
 #include <mesh.h>
 #include <glm/gtx/transform.hpp>
-#include<memory>
+#include <memory>
 
 #include <iostream>
 
@@ -137,8 +137,11 @@ int main()
     }
 
     stbi_set_flip_vertically_on_load(1);
-
-    std::vector<TextureInfo> textures = {{"rocks/aerial_rocks_02_diff_1k.jpg", TextureType::diffuse}, {"rocks/aerial_rocks_02_disp_1k.png", TextureType::diffuse}, {"rocks/aerial_rocks_02_ao_1k.jpg", TextureType::diffuse}, {"rocks/aerial_rocks_02_rough_1k.png", TextureType::specular}, {"rocks/aerial_rocks_02_nor_gl_1k.png", TextureType::normal}};
+    std::vector<TextureInfo> textures = {{"rocks/aerial_rocks_02_diff_1k.jpg", TextureType::diffuse}, 
+                                         {"rocks/aerial_rocks_02_disp_1k.png", TextureType::diffuse}, 
+                                         {"rocks/aerial_rocks_02_ao_1k.jpg", TextureType::diffuse}, 
+                                         {"rocks/aerial_rocks_02_rough_1k.png", TextureType::specular}, 
+                                         {"rocks/aerial_rocks_02_nor_gl_1k.png", TextureType::normal}};
 
     Shader light("light.vert", "light.frag", setUniforms);
     Shader sky_shader("sky.vert", "sky.frag", setSkyUniforms);
