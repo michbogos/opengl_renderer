@@ -44,6 +44,7 @@ private:
     unsigned int VAO, VBO, EBO;
 public:
     Mesh(std::string file, std::vector<TextureInfo> texs);
+    Mesh(std::vector<Vertex> verts, std::vector<unsigned int> idx, std::vector<TextureInfo> texs);
     void draw(Shader shader);
     void cleanup();
     ~Mesh();

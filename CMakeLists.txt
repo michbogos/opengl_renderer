@@ -3,7 +3,7 @@ project(OpenglRenderer)
 
 set (CMAKE_CXX_STANDARD 17)
 
-add_compile_options(-Ofast)
+add_compile_options(-g)
 
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <shader.h>
 #include <mesh.h>
+#include <model.h>
 #include <glm/gtx/transform.hpp>
 #include <memory>
 
@@ -112,6 +113,8 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
+    //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
+
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -124,6 +127,7 @@ int main()
         glfwTerminate();
         return -1;
     }
+    glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouseCallback);
@@ -137,16 +141,14 @@ int main()
     }
 
     stbi_set_flip_vertically_on_load(1);
-    std::vector<TextureInfo> textures = {{"rocks/aerial_rocks_02_diff_1k.jpg", TextureType::diffuse}, 
-                                         {"rocks/aerial_rocks_02_disp_1k.png", TextureType::diffuse}, 
-                                         {"rocks/aerial_rocks_02_ao_1k.jpg", TextureType::diffuse}, 
-                                         {"rocks/aerial_rocks_02_rough_1k.png", TextureType::specular}, 
-                                         {"rocks/aerial_rocks_02_nor_gl_1k.png", TextureType::normal}};
+    std::vector<TextureInfo> textures = {{"textures/marble_bust_01_diff_4k.jpg", TextureType::diffuse}, 
+                                         {"textures/marble_bust_01_rough_4k.jpg", TextureType::specular}, 
+                                         {"textures/marble_bust_01_nor_gl_4k.jpg", TextureType::normal}};
 
     Shader light("light.vert", "light.frag", setUniforms);
     Shader sky_shader("sky.vert", "sky.frag", setSkyUniforms);
-    Mesh obj("sphere.obj", textures);
-    Mesh sky("sphere.obj", {{"sky.png", TextureType::diffuse}});
+
+    Model monke("marble_bust_01_4k.gltf");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -165,8 +167,10 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        obj.draw(light);
-        sky.draw(sky_shader);
+        //obj.draw(light);
+        //sky.draw(sky_shader);
+
+        monke.draw(light);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -175,8 +179,6 @@ int main()
     }
     light.cleanup();
     sky_shader.cleanup();
-    obj.cleanup();
-    sky.cleanup();
 
     glfwTerminate();
     return 0;
